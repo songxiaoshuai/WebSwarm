@@ -1,11 +1,12 @@
-# WebSwarm
+# WebSwarm: Recursive Multi-Agent Orchestration for Deep-and-Wide Web Search
 
-## Overview
+## 🔍 Overview
 
-WebSwarm is a multi-agent framework for complex web search that builds its plan as it goes. Instead of fixing a subtask breakdown up front, a root agent spawns search nodes on the fly — each node gets a local goal plus a search mode that decides how it works. A node can either solve its goal directly or delegate child nodes, then pass evidence back up so parent nodes can expand, revise, or aggregate. This lets the search tree grow recursively as new clues appear, handling depth and breadth in one process.
+**WebSwarm is a recursive multi agent orchestration framework for complex web search tasks that require both deep reasoning and broad information coverage.** Rather than relying on a fixed decomposition plan, WebSwarm progressively builds a delegation tree as new evidence is discovered. Each search node combines a local objective with one of four search modes, including `atom`, `deep`, `wide`, and `entity_collect`. A node can solve its objective directly or create specialized child nodes, while returned results guide further expansion, revision, and aggregation. WebSwarm also uses lightweight web structure probing to align task decomposition with how information is organized online. For batches of similar subtasks, it extracts reusable process experience from a small number of scout nodes and shares it with the remaining sibling nodes. 
 
+![alt text](Figs/method_overall.png)
 
-## Quick Start
+## 🚀 Quick Start
 
 Python 3.10 or later is required.
 
@@ -28,7 +29,7 @@ To use a local search/fetch service, set `SEARCH_ENGINE` to `"local"` in `experi
 python3 run_main.py
 ```
 
-## Repository Structure
+## 🗂️ Repository Structure
 
 ```text
 .
@@ -43,7 +44,7 @@ python3 run_main.py
 └── result_debug/              # Default log output directory; ignored by .gitignore by default
 ```
 
-## Core Workflow
+## ⚙️ Core Workflow
 
 `WebSwarmAgent` connects `TaskManager`, `ToolEnv`, and the root agent. A single task runs approximately as follows:
 
@@ -82,7 +83,7 @@ Top-level WebSwarm runtime parameters are built and validated by `experiment_con
 
 `llm_infer/` is the unified entry point for LLM calls. It currently supports `openai` and `claude`.
 
-## Environment Variables
+## 🔐 Environment Variables
 
 The project loads environment variables from `.env` in the project root:
 
@@ -98,7 +99,7 @@ The project loads environment variables from `.env` in the project root:
 | `JINA_API_KEY` | API key for the default Jina Reader engine used by `fetch_url`. |
 | `LOCAL_ENGINE_BASE_URL` | Root URL of the local search/fetch service. Required only when `SEARCH_ENGINE="local"` in `experiment_config.py`. |
 
-## Runtime Configuration
+## 🛠️ Runtime Configuration
 
 Experiment settings are defined at the top of `experiment_config.py`:
 
@@ -138,7 +139,7 @@ Prompt versions are subject to explicit constraints:
 - When `benchmark="gisa"`, `prompt_version` must be `"gisa"`.
 - For all other benchmarks, `prompt_version` must be `"general"`.
 
-## Deploying the BrowseComp-Plus Retrieval Service Locally
+## 🖥️ Deploying the BrowseComp-Plus Retrieval Service Locally
 
 `depoly_bc_plus_local_corpus/` provides a local corpus retrieval service for BrowseComp-Plus. When `SEARCH_ENGINE="local"`, it replaces Serper and Jina by performing dense retrieval over a fixed corpus and exposing two HTTP endpoints: `POST /search` and `POST /document` (port 8080 by default). These correspond to the `search` and `fetch_url` tools in the tool environment. This setup isolates the effect of the retriever and enables fair comparisons between deep-research agents.
 
@@ -198,7 +199,7 @@ LOCAL_ENGINE_BASE_URL=http://localhost:8080
 
 Then run `python3 run_main.py`. The `search` tool will call `{LOCAL_ENGINE_BASE_URL}/search`, and `fetch_url` will call `{LOCAL_ENGINE_BASE_URL}/document`; no Serper or Jina keys are required.
 
-## Benchmarks
+## 📊 Benchmarks
 
 `TaskManager` currently supports the following benchmark/version combinations:
 
@@ -220,7 +221,7 @@ Evaluation methods:
 - `deepwidesearch`: The current runner skips the original entity-accuracy gate by default and reuses the WideSearch table-evaluation logic.
 - `gisa`: Uses local rule-based evaluation without an LLM judge. Different task types use the corresponding item, set, list, or table primary metric.
 
-## Logging
+## 📝 Logging
 
 Results are written to `result_debug/` by default. The top-level log structure is approximately:
 
@@ -246,7 +247,7 @@ Results are written to `result_debug/` by default. The top-level log structure i
 
 For each task, `results` stores agent messages, the trajectory, subtask results, the final answer, reward information, and per-task tool statistics. Failed tasks include `error` and `traceback` fields for debugging.
 
-### Resuming a Run
+## 🔄 Resuming a Run
 
 At the bottom of `run_main.py`, set `resume_from` to an existing result file:
 
