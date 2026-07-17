@@ -1,0 +1,33 @@
+# Core WebSwarm runtime
+anthropic>=0.58.2
+dateparser>=1.2.2
+httpx>=0.28.1
+langid>=1.1.6
+loguru>=0.7.3
+numpy>=2.2.6
+openai>=1.97.0
+pandarallel>=1.6.5
+pandas>=2.3.2
+pydantic>=2.11.7
+python-dotenv>=1.1.1
+requests>=2.32.4
+tiktoken>=0.9.0
+tqdm>=4.67.1
+typing-extensions>=4.14.1
+
+# BrowseComp-Plus local corpus retrieval service
+accelerate>=1.9.0
+datasets>=4.0.0
+faiss-cpu>=1.11.0.post1
+flask>=3.1.1
+huggingface-hub>=0.33.4
+peft>=0.16.0
+pyngrok>=7.2.12
+tevatron @ git+https://github.com/texttron/tevatron.git@main
+torch>=2.7.1
+torchvision>=0.22.1
+transformers>=4.53.2
+waitress>=3.0.2
+
+# The local FAISS service defaults to FlashAttention 2 on NVIDIA GPUs.
+# Install flash-attn separately with --no-build-isolation after installing PyTorch.
