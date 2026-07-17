@@ -155,9 +155,9 @@ def run_tasks(
             task_config["benchmark"], task_config["benchmark_version"]
         )
         print(
-            f"[run_main] task_ids=None -> 展开为 "
+            f"[run_main] task_ids=None -> expanded to "
             f"{task_config['benchmark']}/{task_config['benchmark_version']} "
-            f"全部 {len(task_ids)} 条任务"
+            f"all {len(task_ids)} tasks"
         )
 
     if resume_from is not None:

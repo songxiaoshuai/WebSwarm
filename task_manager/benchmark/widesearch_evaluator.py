@@ -37,27 +37,27 @@ class WideSearchEval(BaseEvaluator):
         if self.version not in version_map:
             raise ValueError(f"Unsupported WideSearch version: {self.version}")
         dataset_file = os.path.join(dataset_path, version_map[self.version])
-        print(f"[EVAL] 加载数据集: {dataset_file}")
+        print(f"[EVAL] Loading dataset: {dataset_file}")
         self.gold_dir = os.path.join(dataset_path, "widesearch_gold")
         with open(dataset_file, "r", encoding="utf-8") as f:
             dataset = json.load(f)
         self.dataset_dict = {item["instance_id"]: item for item in dataset}
-        print(f"[EVAL] 数据集加载完成，共 {len(dataset)} 条任务")
-        print(f"[EVAL] Gold 答案目录: {self.gold_dir}")
+        print(f"[EVAL] Dataset loaded: {len(dataset)} tasks")
+        print(f"[EVAL] Gold answer directory: {self.gold_dir}")
 
 
     def reset(self, task_id=None):
         """Reset the environment and select a task randomly or by task_id."""
         self.cur_task_id = None                    # Clear the old task ID to avoid reusing prior state.
         if not self.dataset_dict:
-            raise RuntimeError("数据集未加载，请先调用 load_dataset()")
+            raise RuntimeError("Dataset is not loaded; call load_dataset() first")
         if task_id is not None:
             if task_id not in self.dataset_dict:
-                raise ValueError(f"task_id '{task_id}' 不存在于数据集中")
+                raise ValueError(f"task_id '{task_id}' does not exist in the dataset")
             self.cur_task_id = task_id
         else:
             self.cur_task_id = random.choice(list(self.dataset_dict.keys()))
-        print(f"[EVAL] 环境已重置，当前任务 ID: {self.cur_task_id}")
+        print(f"[EVAL] Environment reset; current task ID: {self.cur_task_id}")
         task_info = {"dataset": "widesearch", "task_id": self.cur_task_id, "task": self.dataset_dict[self.cur_task_id]["query"]}
         return task_info
 
@@ -65,14 +65,14 @@ class WideSearchEval(BaseEvaluator):
     def load_target_result(self, task_id: str) -> WideSearchEvaluation:
         """Load the gold answer for a task_id and return a table-evaluation object."""
         if not self.dataset_dict:
-            raise RuntimeError("数据集未加载，请先调用 load_dataset()")
+            raise RuntimeError("Dataset is not loaded; call load_dataset() first")
         if task_id not in self.dataset_dict:
-            raise ValueError(f"task_id '{task_id}' 不存在于数据集中")
+            raise ValueError(f"task_id '{task_id}' does not exist in the dataset")
         item = self.dataset_dict[task_id]
         # Read the gold CSV and store it in the pydantic evaluation object.
         answer_file = os.path.join(self.gold_dir, f"{task_id}.csv")
         if not os.path.exists(answer_file):
-            raise FileNotFoundError(f"找不到 Gold 答案文件: {answer_file}")
+            raise FileNotFoundError(f"Gold answer file not found: {answer_file}")
         eval_obj = item["evaluation"].copy()
         eval_obj["answer_table"] = pd.read_csv(answer_file)
         return WideSearchEvaluation.model_validate(eval_obj)

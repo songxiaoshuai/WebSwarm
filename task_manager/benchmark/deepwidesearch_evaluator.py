@@ -35,7 +35,7 @@ class DeepWideSearchEval(BaseEvaluator):
             os.path.dirname(os.path.abspath(__file__)), "deepwidesearch", "data"
         )
         if self.version not in self.VERSION_MAP:
-            raise ValueError(f"不支持的 version: {self.version}，可选: {list(self.VERSION_MAP.keys())}")
+            raise ValueError(f"Unsupported version: {self.version}; available: {list(self.VERSION_MAP.keys())}")
         self.data_file = os.path.join(self.dataset_path, self.VERSION_MAP[self.version])
         self.gold_dir = os.path.join(self.dataset_path, self.GOLD_DIR_NAME)
         # TaskManager injects the evaluation model; it is not configured separately in this evaluator.
@@ -52,7 +52,7 @@ class DeepWideSearchEval(BaseEvaluator):
     def load_dataset(self):
         """Load a JSONL dataset and build an instance_id -> item mapping."""
         if not os.path.exists(self.data_file):
-            raise FileNotFoundError(f"数据集文件不存在: {self.data_file}")
+            raise FileNotFoundError(f"Dataset file not found: {self.data_file}")
         self.dataset_dict = {}
         with open(self.data_file, "r", encoding="utf-8") as f:
             for line in f:
@@ -65,21 +65,21 @@ class DeepWideSearchEval(BaseEvaluator):
                     item["evaluation"] = json.loads(item["evaluation"])
                 instance_id = item["instance_id"]
                 self.dataset_dict[instance_id] = item
-        print(f"[EVAL] DeepWideSearch 数据集加载完成，共 {len(self.dataset_dict)} 条任务")
-        print(f"[EVAL] Gold 答案目录: {self.gold_dir}")
+        print(f"[EVAL] DeepWideSearch dataset loaded: {len(self.dataset_dict)} tasks")
+        print(f"[EVAL] Gold answer directory: {self.gold_dir}")
 
     def reset(self, task_id=None):
         """Reset the environment and select a task randomly or by task_id."""
         self.cur_task_id = None
         if not self.dataset_dict:
-            raise RuntimeError("数据集未加载，请先调用 load_dataset()")
+            raise RuntimeError("Dataset is not loaded; call load_dataset() first")
         if task_id is not None:
             if task_id not in self.dataset_dict:
-                raise ValueError(f"task_id '{task_id}' 不存在于数据集中")
+                raise ValueError(f"task_id '{task_id}' does not exist in the dataset")
             self.cur_task_id = task_id
         else:
             self.cur_task_id = random.choice(list(self.dataset_dict.keys()))
-        print(f"[EVAL] 环境已重置，当前任务 ID: {self.cur_task_id}")
+        print(f"[EVAL] Environment reset; current task ID: {self.cur_task_id}")
         item = self.dataset_dict[self.cur_task_id]
         task_info = {
             "dataset": "deepwidesearch",
@@ -91,11 +91,11 @@ class DeepWideSearchEval(BaseEvaluator):
     def load_target_result(self, task_id: str) -> WideSearchQuery:
         """Load the gold answer for a task_id and return a WideSearchQuery object."""
         if task_id not in self.dataset_dict:
-            raise ValueError(f"task_id '{task_id}' 不存在于数据集中")
+            raise ValueError(f"task_id '{task_id}' does not exist in the dataset")
         item = self.dataset_dict[task_id]
         answer_file = os.path.join(self.gold_dir, f"{task_id}.csv")
         if not os.path.exists(answer_file):
-            raise FileNotFoundError(f"找不到 Gold 答案文件: {answer_file}")
+            raise FileNotFoundError(f"Gold answer file not found: {answer_file}")
         evaluation = item["evaluation"]
         required_columns = evaluation.get("required", [])
         answer_df = pd.read_csv(answer_file)
@@ -118,7 +118,7 @@ class DeepWideSearchEval(BaseEvaluator):
         evaluation = item["evaluation"]
         answer_file = os.path.join(self.gold_dir, f"{task_id}.csv")
         if not os.path.exists(answer_file):
-            raise FileNotFoundError(f"找不到 Gold 答案文件: {answer_file}")
+            raise FileNotFoundError(f"Gold answer file not found: {answer_file}")
         answer_table = pd.read_csv(answer_file)
         answer_table.columns = [norm_column(c) for c in answer_table.columns]
         eval_obj = {

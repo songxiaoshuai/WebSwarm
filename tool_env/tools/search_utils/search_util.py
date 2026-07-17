@@ -6,13 +6,13 @@ from pydantic import BaseModel, Field
 class SearchResultInfo(BaseModel):
     """Structure representing one summarized search result."""
 
-    id: int = Field(..., description="搜索结果的idx")
-    title: str = Field(..., description="搜索结果的标题")
-    url: str = Field(..., description="搜索结果的URL")
-    site_name: str = Field(..., description="搜索结果的站点名称")
-    date: str = Field(..., description="搜索结果的日期")
-    snippet: str = Field(..., description="搜索结果的摘要")
-    context: str | None = Field(None, description="搜索结果全文(不强制拉取)")
+    id: int = Field(..., description="Search result index")
+    title: str = Field(..., description="Search result title")
+    url: str = Field(..., description="Search result URL")
+    site_name: str = Field(..., description="Search result site name")
+    date: str = Field(..., description="Search result date")
+    snippet: str = Field(..., description="Search result snippet")
+    context: str | None = Field(None, description="Full search result content (not fetched by default)")
 
 
 def format_search_results(queries: list[str], query2search_results: dict[str, list["SearchResultInfo"]]) -> str:

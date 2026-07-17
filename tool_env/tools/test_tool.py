@@ -59,7 +59,7 @@ def test_fetch_url_tool():
     tool.update_original_question("test question")
     result = tool.execute({
         "url": _get_required_env("TOOL_TEST_FETCH_URL"),
-        "goal": "从网页中提取与人工智能相关的信息",
+        "goal": "Extract information related to artificial intelligence from the web page",
     })
     print(result)
     print(f"JINA API calls: {tool.jina_api_cnt}, Tokens: {tool.jina_api_token}")

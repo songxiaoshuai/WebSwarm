@@ -117,7 +117,7 @@ def table_evaluate(
         if prediction_df is None:
             msg = "Markdown table in Prediction not found"
             print(f"msg: {msg} | prediction: {prediction}")
-            return TableMetricObj(msg=msg, warnings=["预测结果中未找到 Markdown 表格"])
+            return TableMetricObj(msg=msg, warnings=["No Markdown table found in the prediction"])
 
         # ── Step 3: Align column names semantically ───────────────────────
         # Predicted and gold column names may use different wording (such as "City" vs "Host City");
@@ -129,7 +129,7 @@ def table_evaluate(
                 tool_config.table_column_align_prompt,
                 call_llm,
             )
-            eval_warnings.extend([f"[列名对齐] {w}" for w in col_warnings])
+            eval_warnings.extend([f"[Column alignment] {w}" for w in col_warnings])
             print(f"column map: {column_map}")
             print(f"befor mapping: {prediction_df.columns}")
             prediction_df.rename(columns=column_map, inplace=True)
@@ -138,7 +138,7 @@ def table_evaluate(
         if set(eval_columns) != set(prediction_df.columns):
             msg = f"eval_columns {eval_columns} != prediction_df {prediction_df.columns}"
             print(f"msg: {msg} | prediction: {prediction}")
-            eval_warnings.append(f"列名对齐失败: {msg}")
+            eval_warnings.append(f"Column alignment failed: {msg}")
             return TableMetricObj(msg=msg, warnings=eval_warnings)
 
         # ── Step 4: Convert all types to strings ──────────────────────────
@@ -179,7 +179,7 @@ def table_evaluate(
                     tool_config.table_column_align_prompt,
                     call_llm,
                 )
-                eval_warnings.extend([f"[主键对齐:{col}] {w}" for w in pk_warnings])
+                eval_warnings.extend([f"[Primary key alignment:{col}] {w}" for w in pk_warnings])
                 print(f"col: {col}, primary_key_map {primary_key_map}")
                 prediction_df[col + "_before_map"] = prediction_df[col]
                 prediction_df[col] = prediction_df[col].apply(lambda x: primary_key_map.get(x, x))
@@ -241,8 +241,8 @@ def table_evaluate(
         )
         if len(df_inner) == 0:
             eval_warnings.append(
-                f"主键匹配行数为 0 (预测行数={len(prediction_df)}, 标准答案行数={len(answer_df)}), "
-                f"可能是主键对齐映射失败或 LLM 输出截断"
+                f"Primary-key match count is 0 (prediction rows={len(prediction_df)}, ground-truth rows={len(answer_df)}), "
+                f"possibly due to a failed primary-key alignment mapping or truncated LLM output"
             )
 
         # ── Step 11: Compute cell-level match scores by column ────────────
@@ -363,5 +363,5 @@ def table_evaluate(
         import traceback
         err_msg = traceback.format_exc()
         print(err_msg)
-        print("表格评估逻辑异常")
-        return TableMetricObj(msg=f"Evaluator error:\n{err_msg}", warnings=[f"评估异常: {err_msg}"])
+        print("Unexpected error in table evaluation")
+        return TableMetricObj(msg=f"Evaluator error:\n{err_msg}", warnings=[f"Evaluation error: {err_msg}"])

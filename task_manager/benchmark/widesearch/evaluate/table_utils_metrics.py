@@ -167,19 +167,19 @@ def llm_judge_column(
     for attempt in range(max_retries):
         result = call_llm(prompt_id, prompt_kwargs)
         if not result:
-            print(f"[llm_judge_column] WARNING: LLM 返回空结果 (attempt {attempt + 1}/{max_retries})")
+            print(f"[llm_judge_column] WARNING: LLM returned an empty result (attempt {attempt + 1}/{max_retries})")
             continue
 
         score_dict = parse_markdown_json(result)
         if score_dict is None:
-            print(f"[llm_judge_column] WARNING: JSON 解析失败 (attempt {attempt + 1}/{max_retries}), LLM输出长度={len(result)}")
+            print(f"[llm_judge_column] WARNING: Failed to parse JSON (attempt {attempt + 1}/{max_retries}), LLM output length={len(result)}")
             continue
 
         score_list = [score_dict.get(f"idx_{idx}", 0) for idx in range(len(response))]
         expected_keys = {f"idx_{idx}" for idx in range(len(response))}
         missing_keys = expected_keys - set(score_dict.keys())
         if missing_keys:
-            print(f"[llm_judge_column] WARNING: 缺失 {len(missing_keys)}/{len(expected_keys)} 个评分key (attempt {attempt + 1}/{max_retries}): {sorted(missing_keys)[:5]}...")
+            print(f"[llm_judge_column] WARNING: Missing {len(missing_keys)}/{len(expected_keys)} scoring keys (attempt {attempt + 1}/{max_retries}): {sorted(missing_keys)[:5]}...")
             continue
 
         msg_list = [result] * len(response)

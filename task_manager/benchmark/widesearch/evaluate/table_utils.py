@@ -88,9 +88,9 @@ def extract_dataframe(prediction: str) -> pd.DataFrame | None:
             response_df = response_df.loc[:, ~response_df.columns.str.startswith("Unnamed")]
             # Validation: NaN in columns or the index indicates parsing issues caused by pipes inside rows.
             if response_df.columns.isna().any() or response_df.index.isna().any():
-                raise ValueError("pd.read_csv 解析结果存在列偏移")
+                raise ValueError("pd.read_csv produced a result with shifted columns")
         except Exception as e:
-            print(f"[WARN] pd.read_csv 解析失败({e})，使用兜底解析...")
+            print(f"[WARN] pd.read_csv failed ({e}); using the fallback parser...")
             response_df = _fallback_parse_markdown_table(new_lines)
     else:
         print(f"Markdown table in Prediction not found :\n {prediction}")
@@ -105,13 +105,13 @@ def parse_markdown_json(completion: str) -> dict | None:
     pat = r"```json\s*(\{.*?\})\s*```"
     matches = re.findall(pat, completion, re.DOTALL)
     if not matches:
-        print(f"[parse_markdown_json] WARNING: 未找到 JSON 块, 原始文本末尾: ...{completion[-200:]}")
+        print(f"[parse_markdown_json] WARNING: JSON block not found; end of raw text: ...{completion[-200:]}")
         return None
     json_str = matches[-1]
     try:
         json_obj = json.loads(json_str)
     except Exception as e:
-        print(f"[parse_markdown_json] WARNING: JSON 解析失败: {e}, 原始片段: {json_str[:200]}...")
+        print(f"[parse_markdown_json] WARNING: Failed to parse JSON: {e}; raw excerpt: {json_str[:200]}...")
         return None
     return json_obj
 
@@ -139,7 +139,7 @@ def primary_key_preprocess(
     for attempt in range(max_retries):
         result = call_llm(prompt_id, prompt_kwargs)
         if not result:
-            last_fail_reason = f"LLM 返回空结果, response 数量={len(response)}, reference 数量={len(reference)}"
+            last_fail_reason = f"LLM returned an empty result; response count={len(response)}, reference count={len(reference)}"
             print(f"[primary_key_preprocess] WARNING: {last_fail_reason} (attempt {attempt + 1}/{max_retries})")
             continue
 
@@ -147,15 +147,15 @@ def primary_key_preprocess(
             print(f"primary_key_preprocess result (attempt {attempt + 1}): {result[:500]}...")
             transform_map = parse_markdown_json(result)
             if transform_map is None:
-                last_fail_reason = f"JSON 解析失败, response 数量={len(response)}, reference 数量={len(reference)}, LLM输出长度={len(result)}"
+                last_fail_reason = f"Failed to parse JSON; response count={len(response)}, reference count={len(reference)}, LLM output length={len(result)}"
                 print(f"[primary_key_preprocess] WARNING: {last_fail_reason} (attempt {attempt + 1}/{max_retries})")
                 continue
             primary_key_map.update(transform_map)
             return primary_key_map, warnings
         except Exception as e:
-            last_fail_reason = f"异常: {e}"
+            last_fail_reason = f"Exception: {e}"
             print(f"[primary_key_preprocess] WARNING: {last_fail_reason} (attempt {attempt + 1}/{max_retries})")
             continue
 
-    warnings.append(f"重试 {max_retries} 次后仍失败: {last_fail_reason}")
+    warnings.append(f"Still failed after {max_retries} retries: {last_fail_reason}")
     return primary_key_map, warnings

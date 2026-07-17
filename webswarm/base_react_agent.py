@@ -44,7 +44,7 @@ class BaseReactAgent:
     def reset(self, task_info: dict):
         """Initialize one leaf-agent run."""
 
-        assert "task" in task_info, "task_info 中缺少 'task' 字段"
+        assert "task" in task_info, "task_info is missing the 'task' field"
         self.task_info = deepcopy(task_info)
         task_observation = task_info["task"]
 
@@ -79,7 +79,7 @@ class BaseReactAgent:
         """Execute one ReAct turn and return observation / reward / status information."""
 
         if self.terminated or self.truncated:
-            raise RuntimeError("环境已结束，请先调用 reset 再执行 step。")
+            raise RuntimeError("The environment has terminated; call reset before step.")
 
         # In function-calling mode, llm_infer returns content, reasoning_content, and tool_calls.
         raw_response = llm_infer(
@@ -93,7 +93,7 @@ class BaseReactAgent:
         message = {"role": "assistant", "content": raw_response["content"]}
         if raw_response["tool_calls"]:
             if len(raw_response["tool_calls"]) > 1:
-                print("[警告] 检测到多个工具调用，仅执行第一个。")
+                print("[WARNING] Multiple tool calls detected; only the first will be executed.")
             raw_response["tool_calls"] = [raw_response["tool_calls"][0]]
             message["tool_calls"] = [raw_response["tool_calls"][0]]
         if raw_response["reasoning_content"]:
@@ -139,7 +139,7 @@ class BaseReactAgent:
         elif info["role"] == "user":
             self.messages.append({"role": "user", "content": observation})
         else:
-            raise ValueError(f"不支持的观测角色: {info['role']}")
+            raise ValueError(f"Unsupported observation role: {info['role']}")
 
         # The action field records this turn's tool-call summary for log analysis and review.
         self.trajectory.append({

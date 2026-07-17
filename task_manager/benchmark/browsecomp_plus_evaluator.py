@@ -48,13 +48,13 @@ class BrowseCompPlusEval(BaseEvaluator):
         
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "browsecomp_plus/data", version_map[self.version])
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f"找不到 BrowseComp Plus 数据集文件: {file_path}")
+            raise FileNotFoundError(f"BrowseComp Plus dataset file not found: {file_path}")
     
         with open(file_path, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
         dataset_list = [json.loads(line) for line in lines]
         self.dataset_dict = {item['task_id']: item for item in dataset_list}
-        print(f"[BROWSECOMP_PLUS] BrowseComp Plus 数据集加载完成，共 {len(self.dataset_dict)} 条任务")
+        print(f"[BROWSECOMP_PLUS] BrowseComp Plus dataset loaded: {len(self.dataset_dict)} tasks")
 
 
     def reset(self, task_id: str = None) -> dict:
@@ -65,17 +65,17 @@ class BrowseCompPlusEval(BaseEvaluator):
         self.cur_answer = None
 
         if not self.dataset_dict:
-            raise RuntimeError("数据集未加载，请先调用 load_dataset()")
+            raise RuntimeError("Dataset is not loaded; call load_dataset() first")
         if task_id is not None:
             if task_id not in self.dataset_dict:
-                raise ValueError(f"task_id '{task_id}' 不存在于数据集中")
+                raise ValueError(f"task_id '{task_id}' does not exist in the dataset")
             self.cur_task_id = task_id
         else:
             self.cur_task_id = random.choice(list(self.dataset_dict.keys()))
         item = self.dataset_dict[self.cur_task_id]
         self.cur_question = item["question"]
         self.cur_answer = item["answer"]
-        print(f"[BROWSECOMP_PLUS] 环境已重置，当前任务 ID: {self.cur_task_id}")
+        print(f"[BROWSECOMP_PLUS] Environment reset; current task ID: {self.cur_task_id}")
 
         return {
             "dataset": "browsecomp_plus",
@@ -89,7 +89,7 @@ class BrowseCompPlusEval(BaseEvaluator):
     def evaluate(self, prediction: str) -> tuple[float, dict]:
         """Evaluate the prediction for the current task."""
         if self.cur_task_id is None:
-            raise RuntimeError("请先调用 reset() 选择一条任务")
+            raise RuntimeError("Call reset() to select a task first")
         # The BrowseComp Plus reward comes directly from the LLM judge's yes/no decision.
         result = browsecomp_plus_llm_judge(
             self.cur_question,

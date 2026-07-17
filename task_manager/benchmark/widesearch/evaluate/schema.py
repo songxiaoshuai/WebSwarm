@@ -15,11 +15,11 @@ class WideSearchEvaluation(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    unique_columns: list[str] = Field(..., description="唯一列")
-    required: list[str] = Field(..., description="必填列")
-    eval_pipeline: dict[str, dict[str, Any]] = Field(..., description="评估管道")
-    answer_table: pd.DataFrame = Field(..., description="标准答案表格")
-    detail_save_path: str | None = Field(None, description="详细结果保存路径")
+    unique_columns: list[str] = Field(..., description="Unique columns")
+    required: list[str] = Field(..., description="Required columns")
+    eval_pipeline: dict[str, dict[str, Any]] = Field(..., description="Evaluation pipeline")
+    answer_table: pd.DataFrame = Field(..., description="Ground-truth answer table")
+    detail_save_path: str | None = Field(None, description="Path for saving detailed results")
 
     @field_validator("answer_table", mode="before")
     @classmethod
@@ -33,7 +33,7 @@ class WideSearchEvaluation(BaseModel):
             columns = v[0]
             data = v[1:] if len(v) > 1 else []
             return pd.DataFrame(data, columns=columns)
-        raise ValueError(f"answer_table必须是DataFrame或二维数组，当前类型: {type(v)}")
+        raise ValueError(f"answer_table must be a DataFrame or two-dimensional array; got: {type(v)}")
 
     @field_serializer("answer_table")
     def serialize_dataframe(self, df: pd.DataFrame) -> list[list[Any]]:
@@ -48,18 +48,18 @@ class WideSearchEvaluation(BaseModel):
 class TableMetricObj(BaseModel):
     """Evaluation result for a table answer, covering row-, cell-, and primary-key-level metrics."""
 
-    msg: str | dict[str, str] = Field(default="", description="评估结果注释")
-    warnings: list[str] = Field(default_factory=list, description="评估过程中的警告信息")
-    score: float = Field(default=0.0, description="评估得分")
-    precision_by_row: float = Field(default=0.0, description="行级精确率")
-    recall_by_row: float = Field(default=0.0, description="行级召回率")
-    f1_by_row: float = Field(default=0.0, description="行级F1分数")
-    precision_by_item: float = Field(default=0.0, description="单元格级精确率")
-    recall_by_item: float = Field(default=0.0, description="单元格级召回率")
-    f1_by_item: float = Field(default=0.0, description="单元格级F1分数")
-    precision_by_unique_col: float = Field(default=0.0, description="主键列级精确率")
-    recall_by_unique_col: float = Field(default=0.0, description="主键列级召回率")
-    f1_by_unique_col: float = Field(default=0.0, description="主键列级F1分数")
+    msg: str | dict[str, str] = Field(default="", description="Evaluation result message")
+    warnings: list[str] = Field(default_factory=list, description="Warnings generated during evaluation")
+    score: float = Field(default=0.0, description="Evaluation score")
+    precision_by_row: float = Field(default=0.0, description="Row-level precision")
+    recall_by_row: float = Field(default=0.0, description="Row-level recall")
+    f1_by_row: float = Field(default=0.0, description="Row-level F1 score")
+    precision_by_item: float = Field(default=0.0, description="Cell-level precision")
+    recall_by_item: float = Field(default=0.0, description="Cell-level recall")
+    f1_by_item: float = Field(default=0.0, description="Cell-level F1 score")
+    precision_by_unique_col: float = Field(default=0.0, description="Primary-key-column-level precision")
+    recall_by_unique_col: float = Field(default=0.0, description="Primary-key-column-level recall")
+    f1_by_unique_col: float = Field(default=0.0, description="Primary-key-column-level F1 score")
 
 
 class LLMEvalConfig:

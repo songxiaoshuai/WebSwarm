@@ -256,7 +256,7 @@ class GISAEval(BaseEvaluator):
         super().__init__(config)
         self.version = (config or {}).get("version", "all")
         if self.version not in self.VERSION_MAP:
-            raise ValueError(f"不支持的 version '{self.version}'，可选: {list(self.VERSION_MAP.keys())}")
+            raise ValueError(f"Unsupported version '{self.version}'; available: {list(self.VERSION_MAP.keys())}")
         self.data_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "gisa", "data"
         )
@@ -276,9 +276,9 @@ class GISAEval(BaseEvaluator):
 
         if not os.path.exists(question_path):
             raise FileNotFoundError(
-                f"找不到问题文件 '{question_file}'，请将其放到: {question_path}"
+                f"Question file '{question_file}' not found; place it at: {question_path}"
             )
-        print(f"[GISA] 加载问题文件 (version={self.version}): {question_path}")
+        print(f"[GISA] Loading question file (version={self.version}): {question_path}")
 
         self.dataset_dict = {}
         with open(question_path, "r", encoding="utf-8") as f:
@@ -290,8 +290,8 @@ class GISAEval(BaseEvaluator):
                 qid = f"gisa_{item['id']}"
                 self.dataset_dict[qid] = item
 
-        print(f"[GISA] 数据集加载完成，共 {len(self.dataset_dict)} 条任务")
-        print(f"[GISA] 答案目录: {self.answers_dir}")
+        print(f"[GISA] Dataset loaded: {len(self.dataset_dict)} tasks")
+        print(f"[GISA] Answer directory: {self.answers_dir}")
 
     # ── Reset ─────────────────────────────────────────────────────────────
 
@@ -299,11 +299,11 @@ class GISAEval(BaseEvaluator):
         """Reset the current GISA sample and return task information visible to the agent."""
         self.cur_task_id = None
         if not self.dataset_dict:
-            raise RuntimeError("数据集未加载")
+            raise RuntimeError("Dataset is not loaded")
         if task_id is not None:
             task_id = str(task_id)
             if task_id not in self.dataset_dict:
-                raise ValueError(f"task_id '{task_id}' 不存在于数据集中")
+                raise ValueError(f"task_id '{task_id}' does not exist in the dataset")
             self.cur_task_id = task_id
         else:
             self.cur_task_id = random.choice(list(self.dataset_dict.keys()))
@@ -317,7 +317,7 @@ class GISAEval(BaseEvaluator):
             "question_type": item.get("question_type", ""),
             "topic": item.get("topic", ""),
         }
-        print(f"[GISA] 当前任务 ID: {self.cur_task_id} | 类型: {item['answer_type']}")
+        print(f"[GISA] Current task ID: {self.cur_task_id} | Type: {item['answer_type']}")
         return task_info
 
     # ── Evaluation ────────────────────────────────────────────────────────
@@ -346,7 +346,7 @@ class GISAEval(BaseEvaluator):
         raw_id = item["id"]
         gt_path = os.path.join(self.answers_dir, f"{raw_id}.csv")
         if not os.path.exists(gt_path):
-            raise FileNotFoundError(f"找不到答案文件: {gt_path}")
+            raise FileNotFoundError(f"Answer file not found: {gt_path}")
 
         metrics = self._evaluator.evaluate_one(
             prediction=prediction,
