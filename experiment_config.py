@@ -36,11 +36,11 @@ from dotenv import load_dotenv
 # ── Experiment selection ─────────────────────────────────────────────────────
 
 # Primary model shared by the WebSwarm main agent, verb agents, and page summaries.
-MODEL = "ep-20260122194732-jvvqq"
+MODEL = "GLM-4.5"
 PROVIDER = "openai"
 
 # Benchmark judge model (used during evaluation; endpoint and key remain in .env).
-JUDGE_MODEL_NAME = "pa/claude-sonnet-4-5-20250929"
+JUDGE_MODEL_NAME = "claude-4.5-sonnet"
 JUDGE_MODEL_PROVIDER = "claude"
 
 # Dataset and version. See the comments below for supported combinations.
@@ -60,8 +60,7 @@ TASK_IDS = ["bc_en_1"]
 # Common examples:
 # None runs all cases for the selected benchmark/version.
 # TASK_IDS = None
-# TASK_IDS = [f"bc_en_{i}" for i in range(1, 6)]
-# TASK_IDS = [f"bc_plus_subset_{i}" for i in range(151, 201)]
+# TASK_IDS = [f"bc_plus_subset_{i}" for i in range(1, 201)]
 # TASK_IDS = [f"ws_en_{i:03d}" for i in range(1, 101)]
 # TASK_IDS = ["gisa_1"]
 # DeepWideSearch uses raw instance_id values, for example:
